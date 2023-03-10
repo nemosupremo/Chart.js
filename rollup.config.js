@@ -1,6 +1,8 @@
 import cleanup from 'rollup-plugin-cleanup';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
+import inject from '@rollup/plugin-inject';
 import {swc} from 'rollup-plugin-swc3';
 import {terser} from 'rollup-plugin-terser';
 import {readFileSync} from 'fs';
@@ -16,6 +18,9 @@ const banner = `/*!
 const extensions = ['.js', '.ts'];
 const plugins = (minify) =>
   [
+    inject({
+      ResizeObserver: 'resize-observer-polyfill'
+    }),
     json(),
     resolve({
       extensions
@@ -25,12 +30,15 @@ const plugins = (minify) =>
         parser: {
           syntax: 'typescript'
         },
-        target: 'es2022'
+        target: 'es5'
       },
       module: {
         type: 'es6'
       },
       sourceMaps: true
+    }),
+    babel({
+      babelHelpers: 'bundled'
     }),
     minify
       ? terser({
